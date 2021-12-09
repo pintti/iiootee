@@ -1,8 +1,5 @@
 import bluetooth as bt
-#import time
 import datetime
-
-from bluetooth.widcomm import BluetoothSocket
 
 
 btAddr = '91:EB:E9:EC:B6:01'
@@ -45,23 +42,19 @@ def btConnect(address):
     return
 
 
-def sync_with_arduino(sock: BluetoothSocket, sync_time: datetime.datetime):
+def sync_with_arduino(sock: bt.BluetoothSocket, sync_time: datetime.datetime):
+    timeout_seconds = 10
     # Send future timestamp when next temperature should be coming from Arduino
     sock.send(int(sync_time.timestamp()).to_bytes(4, "big"))
     ack = recv(sock).decode().strip()
-    if ack:
-        ack = ack.decode().strip()
 
     sync_start = get_current_timestamp()
-    while get_current_timestamp() - sync_start < 10:
+    while get_current_timestamp() - sync_start < timeout_seconds:
         if ack == "1":
             return True
-
-        ack = recv(sock)
-        if ack:
-            ack = ack.decode().strip()
+        ack = recv(sock).decode().strip()
     
-    print("Sync failed after waiting 10 seconds")
+    print(f"Sync failed after waiting {timeout_seconds} seconds")
     return False
 
 
@@ -69,7 +62,9 @@ def syncClock(sock):
     try:
         remaining_seconds = (LAST_SYNC + datetime.timedelta(minutes=10)).timestamp() - get_current_timestamp()
         future_time = get_current_time() + datetime.timedelta(seconds=remaining_seconds)
-        sync_with_arduino(sock, future_time)
+        success = sync_with_arduino(sock, future_time)
+        if not success:
+            raise TimeoutError("Sync with Arduino failed")
         update_last_sync(future_time)
     except:
         print("Clock sync failed")

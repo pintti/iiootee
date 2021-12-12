@@ -68,6 +68,9 @@ def comAck(sock):
     print("ACK failed")
     return False
 
+def data_to_memory(data):
+    with open("memory.csv", "a") as memfile:
+        memfile.write(data)
 
 def main():
     sock = btConnect(btAddr)

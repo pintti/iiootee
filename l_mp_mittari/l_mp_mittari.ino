@@ -22,7 +22,12 @@ DallasTemperature sensor(&oneWire);
 SoftwareSerial bluetooth(2, 3);
 double temp1 = 0; //outside
 double temp2 = 0; //inside
-int idleTimeSeconds = 600;
+// Seconds to idle after sending data to Raspberry
+// Raspberry has a clock system and can interrupt this by sending syncronized time left
+int idleTimeSeconds = 3600;
+// Seconds left to next time Raspberry is assuming data is sent
+// Set to impossible value before idling
+long syncSecondsLeft = 1000000;
 
 void setup() {
   sensor.begin();
@@ -59,7 +64,6 @@ void loop() {
   delay(200);
 }
 
-
 void idle(int seconds)
 {
   char buffer[50];
@@ -81,8 +85,17 @@ void idle(int seconds)
                   USART0_OFF, TWI_OFF);
 
     elapsed += cycleTime;
-    // TODO: Check if temperatures should be coming soon
+    syncSecondsLeft -= cycleTime;
+    read_sync_time();
+    if (syncSecondsLeft <= 0)
+    {
+      // Data is already being waited, return immediately
+      return;
+    }
   }
+
+  // Reset synchronized seconds left
+    syncSecondsLeft = 1000000;
 }
 
 
@@ -114,6 +127,37 @@ void send_bluetooth(){
   Serial.println("Sent data");
 }
 
+/**
+ * @brief Read time left to one hour interval of sending data synchronized by Raspberry. 
+ * Does nothing if Raspberry has not sent synchronized time.
+ * 
+ */
+void read_sync_time()
+{
+  if (bluetooth.available())
+  {
+    // No sync data from Raspberry, do nothing
+    return;
+  }
+  else
+  {
+    // Wait to let the buffer up if its not already
+    delay(10);
+  }
+
+  // Read the incoming buffer to string and convert it to integer
+  String receivedData = "";
+  while (bluetooth.available())
+  {
+    char recvChar = bluetooth.read();
+    if (recvChar != '\n')
+    {
+      receivedData.concat(recvChar);
+    } 
+  }
+  syncSecondsLeft = receivedData.toInt();
+  bluetooth.println("1");
+}
 
 bool read_bluetooth(){
   unsigned long start = millis();

@@ -1,4 +1,3 @@
-#include <OneWire.h>
 #include <DallasTemperature.h>
 #include <LiquidCrystal.h>
 #include <SoftwareSerial.h>
@@ -23,6 +22,7 @@ DallasTemperature sensor(&oneWire);
 SoftwareSerial bluetooth(2, 3);
 double temp1 = 0; //outside
 double temp2 = 0; //inside
+int idleTimeSeconds = 600;
 
 void setup() {
   sensor.begin();
@@ -51,11 +51,38 @@ void loop() {
   lcd_function();
 
   if (mchState==SLEEP){
-    Serial.println("SLEEP WORKS");
+    idle(idleTimeSeconds);
+    Serial.println("Returning from idle. Sending temperature data.");
     mchState=SEND;
   }
 
   delay(200);
+}
+
+
+void idle(int seconds)
+{
+  char buffer[50];
+  sprintf(buffer, "Idling for %d seconds.", seconds);
+  Serial.println(buffer);
+
+  period_t sleepTime = SLEEP_8S;
+  int cycleTime = 8;
+  if (seconds % 8 != 0)
+  {
+    sleepTime = SLEEP_1S;
+    cycleTime = 1;
+  }
+
+  int elapsed = 0;
+  while (elapsed <= seconds)
+  {
+    LowPower.idle(sleepTime, ADC_OFF, TIMER2_OFF, TIMER1_OFF, TIMER0_OFF, SPI_OFF, 
+                  USART0_OFF, TWI_OFF);
+
+    elapsed += cycleTime;
+    // TODO: Check if temperatures should be coming soon
+  }
 }
 
 

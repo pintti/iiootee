@@ -1,4 +1,4 @@
-import bluetooth as bt
+import bluetooth as bt #pybluez
 import datetime
 
 
@@ -113,7 +113,7 @@ def main():
     sock = btConnect(btAddr)
     update_last_sync(get_current_time())
     if sock:
-        while True:
+        while True: #maybe need to add some timeout stuff here, dunno
             data = recv(sock)
             data, ACK = handle_data(data)
             if data:
@@ -121,11 +121,8 @@ def main():
                 print("Starting ACK")
                 if comAck(sock):
                     print("ACK works")
-                    #time.sleep(590)
-                    #
                     #make return here for master
-
-
+                    #return data, LAST_SYNC #return these for the real main to use
     else:
         print("Program failed")
         return 1

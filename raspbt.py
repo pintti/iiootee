@@ -82,9 +82,9 @@ def handle_data(data):
     else:
         temp = data
     if not ACK:
-        return temp.split(","), False
+        return temp[0].split(","), False
     else:
-        return temp.split(","), ACK
+        return temp[0].split(","), ACK
 
 
 def seconds_till_hour():
@@ -95,10 +95,8 @@ def seconds_till_hour():
     return secondsToWait
 
 
-
 def main():
     sock = btConnect(btAddr)
-    update_last_sync(get_current_time())
     if sock:
         while True: #maybe need to add some timeout stuff here, dunno
             data = recv(sock)
@@ -111,6 +109,7 @@ def main():
     else:
         print("Program failed")
         return 1
+
 
 
 if __name__ == "__main__":

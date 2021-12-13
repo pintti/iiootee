@@ -1,5 +1,6 @@
 import raspbt
 from datetime import datetime
+import time
 
 MEMORY_PATH = "memory.csv"
 
@@ -34,14 +35,16 @@ def data_to_memory(data):
 def main():
     timeUntilSync = 0
     timeWait = 0
+    startTime = 0
     while True:
         try:
-            timeNow = datetime.timestamp(datetime.now())
+            timeNow = time.time() - startTime()
             if int(timeUntilSync - timeNow) != timeWait:
                 timeWait = int(timeUntilSync - timeNow)
                 print(timeWait)
             if timeUntilSync - timeNow < 0: 
                 data, timeUntilSync  = raspbt.main()
+                startTime = time.time()
                 memory_manage(MEMORY_PATH)
                 data_to_memory(data)
         except UnicodeDecodeError:

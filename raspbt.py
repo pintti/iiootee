@@ -49,13 +49,13 @@ def sync_with_arduino(sock: bt.BluetoothSocket, seconds_to_transfer: int):
     # Send future timestamp when next temperature should be coming from Arduino
     sock.send(int(seconds_to_transfer).to_bytes(2, "big"))
     print("Sent")
-    ack = recv(sock).decode().strip()
+    _, ack = handle_data(recv(sock))
     print("ack ", ack)
     sync_start = get_current_timestamp()
     while get_current_timestamp() - sync_start < timeout_seconds:
         if ack == "1":
             return True
-        ack = recv(sock).decode().strip()
+        _, ack = handle_data(recv(sock))
 
     print(f"Sync failed after waiting {timeout_seconds} seconds")
     return False

@@ -83,6 +83,7 @@ def handle_data(data):
     ACK = False
     temperature = []
     data = data.decode().strip().split()
+    print("THis is data ", data)
     if len(data)>1:
         temp = data[0]
         ACK = data[1]

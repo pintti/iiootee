@@ -66,8 +66,10 @@ def syncClock(sock):
         if not success:
             raise TimeoutError("Sync with Arduino failed")
         update_last_sync(synchronized_time)
+        return True
     except:
         print("Clock sync failed")
+        return False
 
 
 def handle_data(data):
@@ -111,7 +113,7 @@ def main():
             if data:
                 print(data)
                 print("Starting ACK")
-                if comAck(sock):
+                if syncClock(sock):
                     print("ACK works")
                     #make return here for master
                     #return data, LAST_SYNC #return these for the real main to use
@@ -120,5 +122,5 @@ def main():
         return 1
 
 if __name__ == "__main__":
-    #main()
+    main()
     

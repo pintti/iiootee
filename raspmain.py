@@ -38,7 +38,7 @@ def main():
     startTime = 0
     while True:
         try:
-            timeNow = time.time() - startTime()
+            timeNow = time.time() - startTime
             if int(timeUntilSync - timeNow) != timeWait:
                 timeWait = int(timeUntilSync - timeNow)
                 print(timeWait)

@@ -82,9 +82,9 @@ def handle_data(data):
     else:
         temp = data
     if not ACK:
-        return temp[0].split(","), False
+        return temp.split(","), False
     else:
-        return temp[0].split(","), ACK
+        return temp.split(","), ACK
 
 
 def seconds_till_hour():

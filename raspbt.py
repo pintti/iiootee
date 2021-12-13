@@ -74,6 +74,7 @@ def syncClock(sock):
 def handle_data(data):
     temp = 0
     ACK = False
+    temperature = []
     data = data.decode().strip().split()
     if len(data)>1:
         temp = data[0]
@@ -94,28 +95,22 @@ def seconds_till_hour():
     return secondsToWait
 
 
-def main_data():
+
+def main():
     sock = btConnect(btAddr)
+    update_last_sync(get_current_time())
     if sock:
         while True: #maybe need to add some timeout stuff here, dunno
             data = recv(sock)
             data, ACK = handle_data(data)
             if data:
                 print(data)
-                return data, sock
-                #print("Starting ACK")
-                #if syncClock(sock):
-                #    return data, LAST_SYNC 
+                print("Starting ACK")
+                if syncClock(sock):
+                    return data, LAST_SYNC 
     else:
         print("Program failed")
         return 1
-
-def main_sleep(sock):
-    print("Starting ack")
-    for i in range(0, 10):
-        if syncClock(sock):
-            return LAST_SYNC
-    return 0
 
 
 if __name__ == "__main__":

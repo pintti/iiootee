@@ -99,9 +99,14 @@ def comAck(sock):
     print("ACK failed")
     return False
 
+#Take list of two values and write into file with csv format
 def data_to_memory(data):
-    with open("memory.csv", "a") as memfile:
-        memfile.write(data)
+    try:
+        with open("memory.csv", "a") as memfile:
+            memfile.write(f"{data[0]},{data[1]}\n")
+    except FileNotFoundError or PermissionError: 
+        print("Error when reading memory file!")
+        pass
 
 def main():
     sock = btConnect(btAddr)

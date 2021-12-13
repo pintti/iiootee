@@ -80,18 +80,10 @@ def handle_data(data):
         ACK = data[1]
     else:
         temp = data
-    t = ""
-    for s in temp:
-        if s != ',':
-            t += s
-        else:
-            temperature.append(t)
-            t = ""
-    temperature.append(t)
     if not ACK:
-        return temperature, False
+        return temp[0].split(","), False
     else:
-        return temperature, ACK
+        return temp[0].split(","), ACK
 
 
 def comAck(sock):
@@ -128,4 +120,5 @@ def main():
         return 1
 
 if __name__ == "__main__":
-    main()
+    #main()
+    

@@ -10,7 +10,7 @@ def memory_manage(path):
         if len(content) > 48:
             content = content[-25:-1]
         with open(path, "w") as memory:
-            memory.write(content)
+            memory.write("\n".join(content))
     except FileNotFoundError or PermissionError:
         print("Error when opening memory file!")
         pass

@@ -1,5 +1,6 @@
 import bluetooth as bt #pybluez
 import datetime
+import time
 
 
 btAddr = '91:EB:E9:EC:B6:01'
@@ -44,13 +45,11 @@ def btConnect(address):
 
 def sync_with_arduino(sock: bt.BluetoothSocket, seconds_to_transfer: int):
     timeout_seconds = 10
-    print("Starting send")
+    time.sleep(5)
     print(int(seconds_to_transfer))
     # Send future timestamp when next temperature should be coming from Arduino
     sock.send(int(seconds_to_transfer).to_bytes(2, "big"))
-    print("Sent")
     _, ack = handle_data(recv(sock))
-    print("ack ", ack)
     sync_start = get_current_timestamp()
     while get_current_timestamp() - sync_start < timeout_seconds:
         if ack == "1":
@@ -83,8 +82,6 @@ def handle_data(data):
     ACK = False
     temperature = []
     data = data.decode().strip().split()
-    print("THis is data ", data)
-    print("lendata ", len(data))
     if len(data)>1:
         temp = data[0]
         ACK = data[1]
@@ -95,17 +92,6 @@ def handle_data(data):
     else:
         return temp.split(","), ACK
 
-
-def comAck(sock):
-    start = get_current_timestamp()
-    while get_current_timestamp() - start < 10:
-        sock.send((1).to_bytes(1, "big"))
-        ack = recv(sock).decode().strip()
-        print(ack)
-        if ack == "1":
-            return True
-    print("ACK failed")
-    return False
 
 #Take list of two values and write into file with csv format
 def data_to_memory(data):
@@ -128,8 +114,6 @@ def main():
                 print("Starting ACK")
                 if syncClock(sock):
                     return data, LAST_SYNC 
-                    #make return here for master
-                    #return data, LAST_SYNC #return these for the real main to use
     else:
         print("Program failed")
         return 1

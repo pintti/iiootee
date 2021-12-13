@@ -41,8 +41,7 @@ def main():
                 timeWait = int(timeUntilSync - timeNow)
                 print(timeWait)
             if timeUntilSync - timeNow < 0: 
-                data, lastTime = raspbt.main()
-                timeUntilSync = datetime.timestamp(lastTime)
+                data, timeUntilSync = raspbt.main()
                 print("timeuntil sync ", timeUntilSync-timeNow)
                 memory_manage(MEMORY_PATH)
                 data_to_memory(data)

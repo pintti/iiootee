@@ -104,9 +104,6 @@ def main_data():
             if data:
                 print(data)
                 return data, sock
-                #print("Starting ACK")
-                #if syncClock(sock):
-                #    return data, LAST_SYNC 
     else:
         print("Program failed")
         return 1
@@ -117,6 +114,7 @@ def main_sleep(sock):
         if sock:
             print("Starting sleep sync")
             if syncClock(sock):
+                sock.close()
                 return LAST_SYNC
 
 

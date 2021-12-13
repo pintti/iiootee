@@ -2,8 +2,8 @@ import pyglet as pg
 from datetime import datetime
 import matplotlib.pyplot as plt
 
-WAIT_TIME = 5 #Seconds
-WINDOW_WIDTH = 600 #Pixels
+WAIT_TIME = 600     #Seconds
+WINDOW_WIDTH = 600  #Pixels
 WINDOW_HEIGHT = 500 #Pixels
 WINDOW_TITLE = "Temperature"
 MEMORY_PATH = 'memory.csv'
@@ -12,8 +12,6 @@ fig = plt.figure(num=1, facecolor="#E0E0E0", figsize=(8,5))
 ax = plt.axes()
 ax.set_facecolor("#E0E0E0")
 icon = pg.image.load('images/icon.png')
-graph = pg.image.load('images/graph.jpg')
-sprite = pg.sprite.Sprite(graph, x=0, y=10)
 
 batch = pg.graphics.Batch()
 
@@ -32,7 +30,8 @@ def read_memory(csv_path):
         head_label.text = "ERROR: Memory file not found!"
         return
     content_rows = content.split('\n')
-    content_rows.reverse()
+    if len(content_rows) > 24:
+        content_rows = content_rows[-25:-1] #Get values of last 24 hours, last value is None due to \n so ignore that
     for val in content_rows:
         if val:
             values = val.split(",")
@@ -66,17 +65,22 @@ def data_to_graph(figure, data, hours):
 
     plt.plot(inside_data, color='r', label='Inside temp')
     plt.plot(outside_data, color='b', label='Outside temp')
-    plt.xticks(ticks=[x for x in range(24)], labels=hours)
-    plt.title("Temperature over the last 24 hours")
-    plt.xlabel("Time (HH)")
+    plt.xticks(ticks=[x for x in range(length)], labels=hours)
+    plt.title(f"Temperature over the last {length} hours")
+    plt.xlabel("Time (H)")
     plt.ylabel("Temperature (°C)")
     plt.legend()
     figure.savefig('images/graph.jpg', dpi=75)
     return figure
 
-
+#Initial properties for window
 temp_data = read_memory(MEMORY_PATH)
 in_data, out_data = get_current_values(temp_data)
+horizontal = [((datetime.now().hour - x) % 24) for x in range(len(temp_data))] #Last n hours for the x-axis
+horizontal.reverse()    
+fig = data_to_graph(fig, temp_data, horizontal)
+graph = pg.image.load('images/graph.jpg')
+sprite = pg.sprite.Sprite(graph, x=0, y=10)
 
 head_label = pg.text.Label(text="Currently",
                            bold=True, 
@@ -87,7 +91,7 @@ head_label = pg.text.Label(text="Currently",
                            y=WINDOW_HEIGHT-26, 
                            anchor_x='center')
 
-in_label = pg.text.Label(text=f"Inside: {in_data['current']}",
+in_label = pg.text.Label(text=f"Inside: {in_data['current']} °C",
                          color=(64, 64, 64, 255),
                          bold=True, 
                          font_name="Consolas", 
@@ -99,7 +103,7 @@ in_label = pg.text.Label(text=f"Inside: {in_data['current']}",
                          multiline=True, 
                          align='center')
 
-out_label = pg.text.Label(text=f"Outside: {out_data['current']}",
+out_label = pg.text.Label(text=f"Outside: {out_data['current']} °C",
                           color=(64, 64, 64, 255),
                           bold=True, 
                           font_name="Consolas", 
@@ -122,17 +126,18 @@ def on_draw():
     sprite.draw()
 
 def update(dt):
+    #Update the sprites and labels according to the memory file
     global sprite, fig, ax
-    temp_data = read_memory(MEMORY_PATH)
-    horizontal = [((datetime.now().hour - x) % 24) for x in range(24)]
-    horizontal.reverse()
-    fig = data_to_graph(fig, temp_data, horizontal)
-    ax.set_facecolor("#E0E0E0")
-    graph = pg.image.load('images/graph.jpg')
-    sprite = pg.sprite.Sprite(graph, x=0, y=10)
-    in_data, out_data = get_current_values(temp_data)
-    in_label.text = f"Inside: {in_data['current']} °C"
-    out_label.text = f"Outside: {out_data['current']} °C"
+    temp_data = read_memory(MEMORY_PATH)                               #Read data from csv
+    horizontal = [((datetime.now().hour - x) % 24) for x in range(len(temp_data))] #Last 24 hours for the x-axis
+    horizontal.reverse()                                               #Reverse the order to match the data
+    fig = data_to_graph(fig, temp_data, horizontal)                    #Update the existing figure and save as jpg
+    ax.set_facecolor("#E0E0E0")                                        #Reset axis color to match bg
+    graph = pg.image.load('images/graph.jpg')                          #Load graph
+    sprite = pg.sprite.Sprite(graph, x=0, y=10)                        #Set graph as sprite
+    in_data, out_data = get_current_values(temp_data)                  #Get max, min, avg and current values from memory contents
+    in_label.text = f"Inside: {in_data['current']} °C"                 #Update labels
+    out_label.text = f"Outside: {out_data['current']} °C"              #Update labels
 
 pg.clock.schedule_interval(update, WAIT_TIME)
 pg.app.run()

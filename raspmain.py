@@ -6,6 +6,9 @@ def main():
     timeUntilSync = 0
     while True:
         timeNow = datetime.timestamp(datetime.now())
+        timeWait = int(timeUntilSync-timeNow)
+        if timeWait % 100 == 1:
+            print(timeWait)
         if timeUntilSync - timeNow < 0: 
             data, lastTime = raspbt.main()
             print(data, lastTime)

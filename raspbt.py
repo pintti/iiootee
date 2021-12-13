@@ -95,21 +95,29 @@ def seconds_till_hour():
     return secondsToWait
 
 
-def main():
+def main_data():
     sock = btConnect(btAddr)
-    update_last_sync(get_current_time())
     if sock:
         while True: #maybe need to add some timeout stuff here, dunno
             data = recv(sock)
             data, ACK = handle_data(data)
             if data:
                 print(data)
-                print("Starting ACK")
-                if syncClock(sock):
-                    return data, LAST_SYNC 
+                return data
+                #print("Starting ACK")
+                #if syncClock(sock):
+                #    return data, LAST_SYNC 
     else:
         print("Program failed")
         return 1
+
+def main_sleep():
+    sock = btConnect(btAddr)
+    print("Starting ack")
+    for i in range(0, 10):
+        if syncClock(sock):
+            return LAST_SYNC
+    return 0
 
 
 if __name__ == "__main__":

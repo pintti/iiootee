@@ -41,14 +41,12 @@ def main():
                 timeWait = int(timeUntilSync - timeNow)
                 print(timeWait)
             if timeUntilSync - timeNow < 0: 
-                data, timeUntilSync = raspbt.main()
-                print("timeuntil sync ", timeUntilSync-timeNow)
+                data  = raspbt.main_data()
                 memory_manage(MEMORY_PATH)
                 data_to_memory(data)
+                timeUntilSync = raspbt.main_sleep()
         except UnicodeDecodeError:
             print("Small unicode error, retrying")
-
-
 
 
 if __name__ == "__main__":

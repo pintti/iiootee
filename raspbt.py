@@ -84,15 +84,16 @@ def handle_data(data):
     temperature = []
     data = data.decode().strip().split()
     print("THis is data ", data)
+    print("lendata ", len(data))
     if len(data)>1:
         temp = data[0]
         ACK = data[1]
     else:
         temp = data
     if not ACK:
-        return temp[0].split(","), False
+        return temp.split(","), False
     else:
-        return temp[0].split(","), ACK
+        return temp.split(","), ACK
 
 
 def comAck(sock):

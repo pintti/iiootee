@@ -4,13 +4,18 @@ from datetime import datetime
 MEMORY_PATH = "memory.csv"
 
 def memory_manage(path):
+    new_content = []
     try:
         with open(path, "r") as memory:
             content = memory.readlines()
         if len(content) > 48:
             content = content[-25:-1]
+        for line in content:
+            new_line = line.rstrip("\n")
+            if len(new_line) > 0:
+                new_content.append(new_line)
         with open(path, "w") as memory:
-            memory.write("\n".join(content))
+            memory.write("\n".join(new_content))
     except FileNotFoundError or PermissionError:
         print("Error when opening memory file!")
         pass

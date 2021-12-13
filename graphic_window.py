@@ -2,7 +2,7 @@ import pyglet as pg
 from datetime import datetime
 import matplotlib.pyplot as plt
 
-WAIT_TIME = 1    #Seconds
+WAIT_TIME = 1       #Seconds
 WINDOW_WIDTH = 600  #Pixels
 WINDOW_HEIGHT = 500 #Pixels
 WINDOW_TITLE = "Temperature"
@@ -19,8 +19,9 @@ def read_memory(csv_path):
     if len(content_rows) > 24:
         content_rows = content_rows[-25:-1] #Get values of last 24 hours, last value is None due to \n so ignore that
     for val in content_rows:
-        if val:
-            values = val.split(",")
+        stripped = val.rstrip("\n")
+        if stripped:
+            values = stripped.split(",")
             out_data.append((float(values[0]), float(values[1])))
     #Return a list of tuples
     return out_data

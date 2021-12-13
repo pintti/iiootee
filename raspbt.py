@@ -44,24 +44,30 @@ def btConnect(address):
 
 def sync_with_arduino(sock: bt.BluetoothSocket, seconds_to_transfer: int):
     timeout_seconds = 10
+    print("Starting send")
+    print(int(seconds_to_transfer))
     # Send future timestamp when next temperature should be coming from Arduino
-    sock.send(seconds_to_transfer).to_bytes(4, "big")
+    sock.send(int(seconds_to_transfer).to_bytes(2, "big"))
+    print("Sent")
     ack = recv(sock).decode().strip()
-
+    print("ack ", ack)
     sync_start = get_current_timestamp()
     while get_current_timestamp() - sync_start < timeout_seconds:
         if ack == "1":
             return True
         ack = recv(sock).decode().strip()
-    
+
     print(f"Sync failed after waiting {timeout_seconds} seconds")
     return False
 
 
 def syncClock(sock):
     try:
+        print("Sync clock")
         remaining_seconds = (LAST_SYNC + datetime.timedelta(minutes=60)).timestamp() - get_current_timestamp()
+        print("remianing time ", remaining_seconds)
         synchronized_time = get_current_time() + datetime.timedelta(seconds=remaining_seconds)
+        print("sync time ", synchronized_time)
         success = sync_with_arduino(sock, remaining_seconds)
         if not success:
             raise TimeoutError("Sync with Arduino failed")

@@ -1,7 +1,5 @@
 import bluetooth as bt #pybluez
 import datetime
-import time
-
 
 btAddr = '91:EB:E9:EC:B6:01'
 LAST_SYNC: datetime.datetime = None
@@ -45,7 +43,6 @@ def btConnect(address):
 
 def sync_with_arduino(sock: bt.BluetoothSocket, seconds_to_transfer: int):
     timeout_seconds = 10
-    time.sleep(5)
     print(int(seconds_to_transfer))
     # Send future timestamp when next temperature should be coming from Arduino
     sock.send(int(seconds_to_transfer).to_bytes(2, "big"))

@@ -20,22 +20,35 @@ def memory_manage(path):
         print("Error when opening memory file!")
         pass
 
+
+#Take list of two values and write into file with csv format
+def data_to_memory(data):
+    try:
+        with open("memory.csv", "a") as memfile:
+            memfile.write(f"{data[0]},{data[1]}\n")
+    except FileNotFoundError or PermissionError: 
+        print("Error when reading memory file!")
+        pass
+
+
 def main():
     timeUntilSync = 0
     timeWait = 0
     while True:
-        timeNow = datetime.timestamp(datetime.now())
-        if int(timeUntilSync - timeNow) != timeWait:
-            timeWait = int(timeUntilSync - timeNow)
-            print(timeWait)
-        if timeUntilSync - timeNow < 0: 
-            data, lastTime = raspbt.main()
-            print(data, lastTime)
-            timeUntilSync = datetime.timestamp(lastTime)
-            print("timeuntil sync ", timeUntilSync-timeNow)
-            memory_manage(MEMORY_PATH)
-            raspbt.data_to_memory(data)
-        #make some wait stuff here this hacked piece of shit right now won't work
+        try:
+            timeNow = datetime.timestamp(datetime.now())
+            if int(timeUntilSync - timeNow) != timeWait:
+                timeWait = int(timeUntilSync - timeNow)
+                print(timeWait)
+            if timeUntilSync - timeNow < 0: 
+                data, lastTime = raspbt.main()
+                timeUntilSync = datetime.timestamp(lastTime)
+                print("timeuntil sync ", timeUntilSync-timeNow)
+                memory_manage(MEMORY_PATH)
+                data_to_memory(data)
+        except UnicodeDecodeError:
+            print("Small unicode error, retrying")
+
 
 
 

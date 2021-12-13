@@ -60,14 +60,11 @@ def sync_with_arduino(sock: bt.BluetoothSocket, seconds_to_transfer: int):
 def syncClock(sock):
     try:
         print("Sync clock")
-        remaining_seconds = (LAST_SYNC + datetime.timedelta(minutes=60)).timestamp() - get_current_timestamp()
-        print("remianing time ", remaining_seconds)
-        synchronized_time = get_current_time() + datetime.timedelta(seconds=remaining_seconds)
-        print("sync time ", synchronized_time)
+        remaining_seconds = seconds_till_hour()
         success = sync_with_arduino(sock, remaining_seconds)
         if not success:
             raise TimeoutError("Sync with Arduino failed")
-        update_last_sync(synchronized_time)
+        update_last_sync(remaining_seconds)
         return True
     except:
         print("Clock sync failed")
@@ -85,19 +82,18 @@ def handle_data(data):
     else:
         temp = data
     if not ACK:
-        return temp[0].split(","), False
+        return temp.split(","), False
     else:
-        return temp[0].split(","), ACK
+        return temp.split(","), ACK
 
 
-#Take list of two values and write into file with csv format
-def data_to_memory(data):
-    try:
-        with open("memory.csv", "a") as memfile:
-            memfile.write(f"{data[0]},{data[1]}\n")
-    except FileNotFoundError or PermissionError: 
-        print("Error when reading memory file!")
-        pass
+def seconds_till_hour():
+    currentTime = get_current_time()
+    delta = datetime.timedelta(hours=1)
+    nextHour = (currentTime + delta).replace(microsecond=0, second=0, minute=2)
+    secondsToWait = (nextHour - currentTime).seconds
+    return secondsToWait
+
 
 def main():
     sock = btConnect(btAddr)
@@ -115,6 +111,6 @@ def main():
         print("Program failed")
         return 1
 
+
 if __name__ == "__main__":
     main()
-    

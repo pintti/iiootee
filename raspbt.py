@@ -85,9 +85,9 @@ def handle_data(data):
     else:
         temp = data
     if not ACK:
-        return temp.split(","), False
+        return temp[0].split(","), False
     else:
-        return temp.split(","), ACK
+        return temp[0].split(","), ACK
 
 
 #Take list of two values and write into file with csv format

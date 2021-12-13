@@ -125,7 +125,7 @@ def main():
                 print(data)
                 print("Starting ACK")
                 if syncClock(sock):
-                    print("ACK works")
+                    return data, LAST_SYNC 
                     #make return here for master
                     #return data, LAST_SYNC #return these for the real main to use
     else:

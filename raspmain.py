@@ -25,12 +25,11 @@ def memory_manage(path):
 #Take list of two values and write into file with csv format
 def data_to_memory(data):
     try:
-        with open(f"{MEMORY_PATH}.csv", "a") as memfile:
-            memfile.write(f"{data[0]},{data[1]}\n")
+        with open(f"{MEMORY_PATH}", "a+") as memfile:
+            hour = get_hour()
+            memfile.write(f"{hour}: {data[0]},{data[1]}\n")
     except FileNotFoundError or PermissionError: 
         print("Error when reading memory file!")
-        with open(f"{MEMORY_PATH}.csv", "w"):
-            data_to_memory(data)
 
 
 def get_date():
@@ -42,7 +41,8 @@ def get_hour():
 
 
 def update_memory_path():
-    MEMORY_PATH = "temp/" + str(get_date())
+    global MEMORY_PATH
+    MEMORY_PATH = "temp/" + str(get_date()) + ".txt"
 
 
 def main():

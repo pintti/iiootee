@@ -1,8 +1,8 @@
 import raspbt
-from datetime import datetime
+from datetime import date, datetime
 import time
 
-MEMORY_PATH = "memory.csv"
+MEMORY_PATH = ""
 
 def memory_manage(path):
     new_content = []
@@ -25,11 +25,24 @@ def memory_manage(path):
 #Take list of two values and write into file with csv format
 def data_to_memory(data):
     try:
-        with open("memory.csv", "a") as memfile:
+        with open(f"{MEMORY_PATH}.csv", "a") as memfile:
             memfile.write(f"{data[0]},{data[1]}\n")
     except FileNotFoundError or PermissionError: 
         print("Error when reading memory file!")
-        pass
+        with open(f"{MEMORY_PATH}.csv", "w"):
+            data_to_memory(data)
+
+
+def get_date():
+    return datetime.now().date()
+
+
+def get_hour():
+    return datetime.now().hour
+
+
+def update_memory_path():
+    MEMORY_PATH = "temp/" + str(get_date())
 
 
 def main():
@@ -45,7 +58,8 @@ def main():
             if timeUntilSync - timeNow < 0: 
                 data, sock = raspbt.main_data()
                 startTime = time.time()
-                memory_manage(MEMORY_PATH)
+                update_memory_path()
+                #memory_manage(MEMORY_PATH)
                 data_to_memory(data)
                 timeUntilSync = raspbt.main_sleep(sock)
         except UnicodeDecodeError:

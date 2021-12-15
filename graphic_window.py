@@ -6,25 +6,30 @@ WAIT_TIME = 1       #Seconds
 WINDOW_WIDTH = 600  #Pixels
 WINDOW_HEIGHT = 500 #Pixels
 WINDOW_TITLE = "Temperature"
-MEMORY_PATH = 'memory.csv'
 
 #Read data from .csv file where values are formatted inside,outside\ninside,outside ....
-def read_memory(csv_path):
+def read_memory(mem_path):
     out_data = []
+    hours = []
     try:
-        with open(csv_path, "r") as memory:
+        with open(mem_path, "r") as memory:
             content_rows = memory.readlines()
     except FileNotFoundError:
         return
-    if len(content_rows) > 24:
-        content_rows = content_rows[-25:-1] #Get values of last 24 hours, last value is None due to \n so ignore that
     for val in content_rows:
         stripped = val.rstrip("\n")
+        hour = stripped.split(" ")[0].rstrip(":")
+        values = stripped.split(" ")[1]
         if stripped:
-            values = stripped.split(",")
-            out_data.append((float(values[0]), float(values[1])))
-    #Return a list of tuples
-    return out_data
+            out_data.append((float(values.split(",")[0]), float(values.split(",")[1])))
+            hours.append(hour)
+    #Return a list of tuples with data and a corresponding list of hours
+    return out_data, hours
+
+def get_mem_path():
+    date = datetime.now().date()
+    path = f"temp/{date}.txt"
+    return path
 
 #Input needs needed as a list of tuples,
 #where each tuple(inside_temp, outside_temp)
@@ -37,7 +42,7 @@ def get_current_values(data):
     length = len(data)
     #Loop through data to find the max, min and average values
     for values in data:
-        for i, value in enumerate(values):
+        for i, value in enumerate(values[1:2]):
             if value > max[i]: max[i] = value
             if value < min[i]: min[i] = value
             avg[i] += (value / length)
@@ -68,12 +73,10 @@ def initialize():
     window = pg.window.Window(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE)
     pg.gl.glClearColor(0.8784313725490196, 0.8784313725490196, 0.8784313725490196, 1) #Background color to light grey
     
-    temp_data = read_memory(MEMORY_PATH)
+    temp_data, hours = read_memory(get_mem_path())
     window.set_icon(icon)
     in_data, out_data = get_current_values(temp_data)
-    horizontal = [((datetime.now().hour - x) % 24) for x in range(len(temp_data))] #Last n hours for the x-axis
-    horizontal.reverse()    
-    fig = data_to_graph(fig, temp_data, horizontal)
+    fig = data_to_graph(fig, temp_data, hours)
     graph = pg.image.load('images/graph.jpg')
     sprite = pg.sprite.Sprite(graph, x=0, y=10)
     return window, fig, ax, in_data, out_data, sprite
@@ -91,10 +94,8 @@ head_label = pg.text.Label(text="Currently",
 def update(dt):
     #Update the sprites and labels according to the memory file
     global sprite, fig, ax
-    temp_data = read_memory(MEMORY_PATH)                               #Read data from csv
-    horizontal = [((datetime.now().hour - x) % 24) for x in range(len(temp_data))] #Last 24 hours for the x-axis
-    horizontal.reverse()                                               #Reverse the order to match the data
-    fig = data_to_graph(fig, temp_data, horizontal)                    #Update the existing figure and save as jpg
+    temp_data, hours = read_memory(get_mem_path())                     #Read data from csv
+    fig = data_to_graph(fig, temp_data, hours)                         #Update the existing figure and save as jpg
     ax.set_facecolor("#E0E0E0")                                        #Reset axis color to match bg
     graph = pg.image.load('images/graph.jpg')                          #Load graph
     sprite = pg.sprite.Sprite(graph, x=0, y=10)                        #Set graph as sprite

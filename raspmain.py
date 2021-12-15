@@ -17,9 +17,8 @@ def memory_manage(path):
                 new_content.append(new_line)
         with open(path, "w") as memory:
             memory.write("\n".join(new_content))
-    except FileNotFoundError or PermissionError:
+    except (FileNotFoundError, PermissionError):
         print("Error when opening memory file!")
-        pass
 
 
 #Take list of two values and write into file with csv format
@@ -28,8 +27,8 @@ def data_to_memory(data):
         with open(f"{MEMORY_PATH}", "a+") as memfile:
             hour = get_hour()
             memfile.write(f"{hour}: {data[0]},{data[1]}\n")
-    except FileNotFoundError or PermissionError: 
-        print("Error when reading memory file!")
+    except (FileNotFoundError, PermissionError):
+        print("Error when writing memory file!")
 
 
 def get_date():
